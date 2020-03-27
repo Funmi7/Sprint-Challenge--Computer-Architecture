@@ -227,7 +227,7 @@ class CPU:
                 self.flag = 0b00000100
             elif self.reg[reg_a] > self.reg[reg_b]:
                 self.flag = 0b00000010
-        elif op == ADD:
+        elif op == AND:
           self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
         
         elif op == OR:
@@ -248,7 +248,7 @@ class CPU:
         elif op == MOD:
             if self.reg[reg_b] == 0:
                 print("Can't divide by a number which is 0")
-                self.halted
+                self.handle_hlt()
             else:
                 self.reg[reg_a] = self.reg[reg_a] % self.reg[reg_b]
         else:
@@ -264,7 +264,7 @@ class CPU:
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            #self.fl,
+            # self.fl,
             #self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
