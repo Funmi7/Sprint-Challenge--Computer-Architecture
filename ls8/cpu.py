@@ -15,6 +15,13 @@ CMP = 0b10100111
 JMP = 0b01010100
 JEQ = 0b01010101
 JNE = 0b01010110
+AND = 0b10101000
+OR = 0b10101010
+XOR = 0b10101011
+NOT = 0b01101001
+SHL = 0b10101100
+SHR = 0b10101101
+MOD = 0b10100100
 
 sp = 7
 
@@ -45,6 +52,13 @@ class CPU:
         self.branchtable[JMP] = self.handle_jmp
         self.branchtable[JEQ] = self.handle_jeq
         self.branchtable[JNE] = self.handle_jne
+        self.branchtable[AND] = self.handle_and
+        self.branchtable[OR] = self.handle_or
+        self.branchtable[XOR] = self.handle_xor
+        self.branchtable[NOT] = self.handle_not
+        self.branchtable[SHL] = self.handle_shl
+        self.branchtable[SHR] = self.handle_shr
+        self.branchtable[MOD] = self.handle_mod
         
         self.reg[7] = self.ram[0xF4]
 
@@ -128,7 +142,46 @@ class CPU:
         else:
             self.pc += 2
     
+    def handle_and(self):
+        num_1 = self.ram_read(self.pc + 1)
+        num_2 = self.ram_read(self.pc + 2)
+        self.alu(AND, num_1, num_2)
+        self.pc += 3
+    
+    def handle_or(self):
+        num_1 = self.ram_read(self.pc + 1)
+        num_2 = self.ram_read(self.pc + 2)
+        self.alu(OR, num_1, num_2)
+        self.pc += 3
 
+    def handle_xor(self):
+        num_1 = self.ram_read(self.pc + 1)
+        num_2 = self.ram_read(self.pc + 2)
+        self.alu(XOR, num_1, num_2)
+        self.pc += 3
+    
+    def handle_not(self):
+        num_1 = self.ram_read(self.pc + 1)
+        self.alu(NOT, num_1, None)
+        self.pc += 2
+    
+    def handle_shl(self):
+        num_1 = self.ram_read(self.pc + 1)
+        num_2 = self.ram_read(self.pc + 2)
+        self.alu(SHL, num_1, num_2)
+        self.pc += 3
+    
+    def handle_shr(self):
+        num_1 = self.ram_read(self.pc + 1)
+        num_2 = self.ram_read(self.pc + 2)
+        self.alu(SHR, num_1, num_2)
+        self.pc += 3
+
+    def handle_mod(self):
+        num_1 = self.ram_read(self.pc + 1)
+        num_2 = self.ram_read(self.pc + 2)
+        self.alu(MOD, num_1, num_2)
+        self.pc += 3
 
 
     def ram_read(self, address):
@@ -174,6 +227,30 @@ class CPU:
                 self.flag = 0b00000100
             elif self.reg[reg_a] > self.reg[reg_b]:
                 self.flag = 0b00000010
+        elif op == ADD:
+          self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
+        
+        elif op == OR:
+            self.reg[reg_a] = self.reg[reg_a] | self.reg[reg_b]
+        
+        elif op == XOR:
+            self.reg[reg_a] = self.reg[reg_a] ^ self.reg[reg_b]
+        
+        elif op == NOT:
+            self.reg[reg_a] = ~self.reg[reg_a]
+        
+        elif op == SHL:
+            self.reg[reg_a] = self.reg[reg_a] << self.reg[reg_b]
+
+        elif op == SHR:
+            self.reg[reg_a] = self.reg[reg_a] >> self.reg[reg_b]
+        
+        elif op == MOD:
+            if self.reg[reg_b] == 0:
+                print("Can't divide by a number which is 0")
+                self.halted
+            else:
+                self.reg[reg_a] = self.reg[reg_a] % self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
